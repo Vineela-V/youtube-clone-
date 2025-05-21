@@ -1,40 +1,89 @@
-import React from 'react'
-import './Navbar.css'
-import menu_icon from '../../assets/menu.png'
-import logo from '../../assets/logo.png'
-import search_icon from '../../assets/search.png'
-import upload_icon from '../../assets/upload.png'
-import more_icon from '../../assets/more.png'
-import notification_icon from '../../assets/notification.png'
-import jack_img from '../../assets/jack.png'
-import { Link } from 'react-router-dom'
+import React, { useState } from "react";
+import { AppBar, Toolbar, Typography, InputBase, IconButton, Box,} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MicIcon from "@mui/icons-material/Mic";
+import { useNavigate } from "react-router-dom";
 
-const Navbar = ({ setSidebar }) => {
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
-    const sidebar_toggle = (e) => {
-        setSidebar((prev) => prev === false ? true : false);
+const Navbar = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
+
+  const handleVoiceSearch = () => {
+    if (!recognition) {
+      alert("Speech recognition not supported in this browser.");
+      return;
     }
 
-    return (
-        <nav className='flex-div'>
-            <div className="nav-left flex-div">
-                <img src={menu_icon} alt="" className="menu-icon" onClick={sidebar_toggle} />
-                <Link to='/'> <img src={logo} alt="" className="logo" /></Link>
-            </div>
-            <div className="nav-middle flex-div">
-                <div className="search-box flex-div">
-                    <input type="text" placeholder="Search" />
-                    <img src={search_icon} alt="" />
-                </div>
-            </div>
-            <div className="nav-right flex-div">
-                <img src={upload_icon} alt="" />
-                <img src={more_icon} alt="" />
-                <img src={notification_icon} alt="" />
-                <img src={jack_img} alt="" className="user-icon" />
-            </div>
-        </nav>
-    )
-}
+    recognition.lang = "en-US";
+    recognition.start();
 
-export default Navbar
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchTerm(transcript);
+      navigate(`/search?q=${encodeURIComponent(transcript)}`);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+    };
+  };
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          YouTube Clone
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <InputBase
+            placeholder="Search…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
+            sx={{
+              color: "inherit",
+              bgcolor: "rgba(255,255,255,0.15)",
+              px: 2,
+              py: 0.5,
+              borderRadius: 1,
+              width: { xs: "100px", sm: "200px", md: "300px" },
+            }}
+          />
+
+          <IconButton onClick={handleSearch} color="inherit">
+            <SearchIcon />
+          </IconButton>
+
+          <IconButton onClick={handleVoiceSearch} color="inherit">
+            <MicIcon />
+          </IconButton>
+
+          <IconButton color="inherit">
+            <NotificationsIcon />
+          </IconButton>
+
+          <IconButton color="inherit">
+            <AccountCircleIcon />
+          </IconButton>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+export default Navbar;
