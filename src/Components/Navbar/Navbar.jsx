@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import {AppBar,Toolbar,Typography,IconButton,Box,Tooltip,Menu,MenuItem,} from "@mui/material";
-import { styled, alpha, useTheme } from "@mui/material/styles";
+import { AppBar, Toolbar, Typography, IconButton, Box, Tooltip, Menu, MenuItem, InputBase,useMediaQuery,Drawer,Divider,List,ListItem,ListItemIcon,ListItemText,} from "@mui/material";
+import { styled, useTheme, alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MicIcon from "@mui/icons-material/Mic";
-import InputBase from "@mui/material/InputBase";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 
 const SpeechRecognition =
@@ -15,11 +15,12 @@ const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 const SearchWrapper = styled("div")(({ theme }) => ({
   backgroundColor: alpha(theme.palette.text.primary, 0.05),
   borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(0.5, 1),
   display: "flex",
   alignItems: "center",
   width: "100%",
-  maxWidth: 300,
+  [theme.breakpoints.up("sm")]: {
+    width: 300,
+  },
 }));
 
 const SearchInput = styled(InputBase)(({ theme }) => ({
@@ -28,14 +29,12 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
 }));
 
-const SearchButton = styled(IconButton)(({ theme }) => ({
-  padding: theme.spacing(1),
-}));
-
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
   const handleSearch = () => {
@@ -73,14 +72,75 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="sticky" color="default" elevation={1}>
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          YouTube Clone
-        </Typography>
+    <>
+      <AppBar position="sticky" color="default" elevation={1}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {isMobile && (
+              <IconButton onClick={() => setMobileOpen(true)}>
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              YouTube Clone
+            </Typography>
+          </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <SearchWrapper>
+          {!isMobile && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <SearchWrapper>
+                <SearchInput
+                  placeholder="Search…"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  inputProps={{ "aria-label": "search" }}
+                />
+                <IconButton onClick={handleSearch} color="inherit">
+                  <SearchIcon />
+                </IconButton>
+              </SearchWrapper>
+
+              <Tooltip title="Voice Search">
+                <IconButton onClick={handleVoiceSearch} color="inherit">
+                  <MicIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Tooltip title="Notifications">
+              <IconButton color="inherit">
+                <NotificationsIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Profile">
+              <IconButton color="inherit" onClick={handleProfileClick}>
+                <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleCloseProfileMenu}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem onClick={handleCloseProfileMenu}>My Account</MenuItem>
+              <MenuItem onClick={handleCloseProfileMenu}>Settings</MenuItem>
+              <MenuItem onClick={handleCloseProfileMenu}>Signin</MenuItem>
+              <MenuItem onClick={handleCloseProfileMenu}>Logout</MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer anchor="top" open={mobileOpen} onClose={() => setMobileOpen(false)}>
+        <Box p={2} role="presentation" sx={{ width: "100%" }}>
+          <SearchWrapper sx={{ mb: 2 }}>
             <SearchInput
               placeholder="Search…"
               value={searchTerm}
@@ -88,48 +148,22 @@ const Navbar = () => {
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               inputProps={{ "aria-label": "search" }}
             />
-            <SearchButton
-              onClick={handleSearch}
-              aria-label="search button"
-              color="inherit"
-            >
+            <IconButton onClick={handleSearch} color="inherit">
               <SearchIcon />
-            </SearchButton>
-          </SearchWrapper>
-
-          <Tooltip title="Voice Search">
+            </IconButton>
             <IconButton onClick={handleVoiceSearch} color="inherit">
               <MicIcon />
             </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Notifications">
-            <IconButton color="inherit">
-              <NotificationsIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Profile">
-            <IconButton color="inherit" onClick={handleProfileClick}>
-              <AccountCircleIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseProfileMenu}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem onClick={handleCloseProfileMenu}>My Account</MenuItem>
-            <MenuItem onClick={handleCloseProfileMenu}>Settings</MenuItem>
-            <MenuItem onClick={handleCloseProfileMenu}>Signin</MenuItem>
-            <MenuItem onClick={handleCloseProfileMenu}>Logout</MenuItem>
-          </Menu>
+          </SearchWrapper>
+          <Divider />
+          <List>
+            <ListItem button onClick={() => setMobileOpen(false)}>
+              <ListItemText primary="Close" />
+            </ListItem>
+          </List>
         </Box>
-      </Toolbar>
-    </AppBar>
+      </Drawer>
+    </>
   );
 };
 
