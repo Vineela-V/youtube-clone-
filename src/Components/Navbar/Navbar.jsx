@@ -82,7 +82,7 @@ const Navbar = () => {
               </IconButton>
             )}
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              YouTube Clone
+              Youtube
             </Typography>
           </Box>
 

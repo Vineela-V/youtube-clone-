@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import './Playvideo.css'
-import like from '../../assets/like.png'
-import dislike from '../../assets/dislike.png'
-import share from '../../assets/share.png'
-import save from '../../assets/save.png'
-import { API_KEY, value_converter } from '../../data'
-import moment from 'moment'
+import React, { useEffect, useState } from 'react';
+import './Playvideo.css';
+import like from '../../assets/like.png';
+import dislike from '../../assets/dislike.png';
+import share from '../../assets/share.png';
+import save from '../../assets/save.png';
+import { API_KEY, value_converter } from '../../data';
+import moment from 'moment';
 
 const PlayVideo = ({ videoId }) => {
     const [apiData, setApiData] = useState(null);
